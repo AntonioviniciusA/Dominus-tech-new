@@ -1,5 +1,6 @@
-import { Facebook, Instagram, MapPin, Mail, Phone } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Facebook, Instagram, MapPin, Mail, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -11,24 +12,36 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-4">Institucional</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/quem-somos"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Quem Somos
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/termos-e-condicoes"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Termos e Condições
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/politica-de-privacidade"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Política de Privacidade
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/politica-de-cookies"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Política de Cookies
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -38,24 +51,36 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-4">Ajuda</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/central-de-atendimento"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Central de Atendimento
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/como-comprar"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Como Comprar
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/prazos-e-entregas"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Prazos e Entregas
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">
+                <Link
+                  href="/trocas-e-devolucoes"
+                  className="text-gray-400 hover:text-primary transition-colors text-sm"
+                >
                   Trocas e Devoluções
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -91,22 +116,32 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-lg mb-4">Redes Sociais</h3>
             <div className="flex gap-4 mb-6">
-              <a href="#" className="bg-gray-800 hover:bg-green-600 p-3 rounded-lg transition-colors">
+              <a
+                href="#"
+                className="bg-gray-800 hover:bg-green-600 p-3 rounded-lg transition-colors"
+              >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="bg-gray-800 hover:bg-green-600 p-3 rounded-lg transition-colors">
+              <a
+                href="#"
+                className="bg-gray-800 hover:bg-green-600 p-3 rounded-lg transition-colors"
+              >
                 <Instagram className="w-5 h-5" />
               </a>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700 text-white font-bold w-full">Avalie Nosso Site</Button>
+            <Button className="bg-green-600 hover:bg-green-700 text-white font-bold w-full">
+              Avalie Nosso Site
+            </Button>
           </div>
         </div>
 
         {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 text-sm">© 2025 Dominus - Todos os direitos reservados</p>
+          <p className="text-gray-400 text-sm">
+            © 2025 Dominus - Todos os direitos reservados
+          </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
