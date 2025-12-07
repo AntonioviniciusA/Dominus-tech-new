@@ -11,6 +11,7 @@ import { AlertCircle } from "lucide-react"
 import Image from "next/image"
 
 export default function AdminLoginPage() {
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -25,13 +26,14 @@ export default function AdminLoginPage() {
       const response = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username, password }),
       })
 
       if (response.ok) {
         router.push("/admin")
       } else {
-        setError("Senha incorreta. Tente novamente.")
+        const data = await response.json()
+        setError(data.error || "Credenciais inválidas. Tente novamente.")
       }
     } catch (err) {
       setError("Erro ao fazer login. Tente novamente.")
@@ -61,6 +63,19 @@ export default function AdminLoginPage() {
             )}
 
             <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Usuário</label>
+              <Input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Digite o usuário"
+                className="w-full text-gray-900"
+                disabled={isLoading}
+                required
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Senha</label>
               <Input
                 type="password"
@@ -69,6 +84,7 @@ export default function AdminLoginPage() {
                 placeholder="Digite a senha"
                 className="w-full text-gray-900"
                 disabled={isLoading}
+                required
               />
             </div>
 

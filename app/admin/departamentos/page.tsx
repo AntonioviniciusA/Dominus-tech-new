@@ -6,17 +6,31 @@ import { useStore } from "@/lib/store-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Trash2, ArrowLeft, Edit2, Check, X } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function DepartamentosPage() {
-  const { departments, addDepartment, updateDepartment, deleteDepartment } = useStore()
+  const { departments, addDepartment, updateDepartment, deleteDepartment, refreshData } = useStore()
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
   })
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editData, setEditData] = useState<any>({})
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [departmentToDelete, setDepartmentToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,6 +69,29 @@ export default function DepartamentosPage() {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
+  }
+
+  const handleDeleteClick = (departmentId: string, departmentName: string) => {
+    setDepartmentToDelete(departmentId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!departmentToDelete) return
+
+    setIsDeleting(true)
+    try {
+      await deleteDepartment(departmentToDelete)
+      toast.success("Departamento deletado com sucesso!")
+      await refreshData()
+    } catch (error) {
+      toast.error("Erro ao deletar departamento. Tente novamente.")
+      console.error("Erro ao deletar departamento:", error)
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setDepartmentToDelete(null)
+    }
   }
 
   return (
@@ -164,7 +201,7 @@ export default function DepartamentosPage() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => deleteDepartment(dept.id)}
+                            onClick={() => handleDeleteClick(dept.id, dept.name)}
                             className="flex-1"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
@@ -180,6 +217,28 @@ export default function DepartamentosPage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar este departamento? Esta ação não pode ser desfeita e todos os produtos
+              relacionados também serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deletando..." : "Deletar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

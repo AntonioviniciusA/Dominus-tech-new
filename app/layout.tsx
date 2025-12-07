@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { StoreProvider } from "@/lib/store-context"
 import { CookieConsent } from "@/components/cookie-consent"
+import { Toaster } from "@/components/ui/sonner"
 
 const _geist = Geist({ subsets: ["latin"] })
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-serif" })
@@ -27,6 +28,7 @@ export default function RootLayout({
           {children}
           <CookieConsent />
         </StoreProvider>
+        <Toaster />
         <Analytics />
       </body>
     </html>

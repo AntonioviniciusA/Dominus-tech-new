@@ -1,31 +1,73 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { turso } from "@/lib/turso";
+import { verifyPassword } from "@/lib/auth-utils";
 
 export async function POST(request: NextRequest) {
   try {
-    const { password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!password) {
-      return NextResponse.json({ error: "Senha obrigatória" }, { status: 400 });
+    if (!username || !password) {
+      return NextResponse.json(
+        { error: "Username e senha são obrigatórios" },
+        { status: 400 }
+      );
     }
 
-    const adminPassword = process.env.ADMIN_SECRET_KEY;
+    // Busca o admin no banco de dados
+    const result = await turso.execute({
+      sql: "SELECT id, username, email, password_hash, is_active FROM admins WHERE username = ?",
+      args: [username],
+    });
 
-    console.log("[v0] Login attempt with password:", password);
-    console.log("[v0] Admin password from env:", adminPassword);
-    console.log("[v0] Match:", password === adminPassword);
-
-    if (password !== adminPassword) {
-      return NextResponse.json({ error: "Senha incorreta" }, { status: 401 });
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Credenciais inválidas" },
+        { status: 401 }
+      );
     }
 
-    const token = Buffer.from(`${password}:${Date.now()}`).toString("base64");
+    const admin = result.rows[0];
 
-    const response = NextResponse.json({ success: true });
+    // Verifica se o admin está ativo
+    if (admin.is_active !== 1) {
+      return NextResponse.json(
+        { error: "Conta desativada. Entre em contato com o administrador." },
+        { status: 403 }
+      );
+    }
+
+    // Verifica a senha
+    const isValidPassword = verifyPassword(
+      password,
+      admin.password_hash as string
+    );
+
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { error: "Credenciais inválidas" },
+        { status: 401 }
+      );
+    }
+
+    // Gera token de autenticação
+    const SECRET_KEY =
+      process.env.ADMIN_SECRET_KEY || "your-secret-key-change-in-production";
+    const token = Buffer.from(`${SECRET_KEY}:${Date.now()}`).toString("base64");
+
+    const response = NextResponse.json({
+      success: true,
+      admin: {
+        id: admin.id,
+        username: admin.username,
+        email: admin.email,
+      },
+    });
+
     response.cookies.set("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 7 * 24 * 60 * 60, // 7 dias
       path: "/",
     });
 
