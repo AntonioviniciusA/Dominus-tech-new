@@ -1,5 +1,5 @@
-import { turso } from "../turso"
-import { hashPassword } from "../auth-utils"
+import { turso } from "../turso";
+import { hashPassword } from "../auth-utils";
 
 /**
  * Cria todas as tabelas necessárias no banco de dados Turso
@@ -15,7 +15,7 @@ export async function runMigrations() {
         slug TEXT NOT NULL UNIQUE,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    `)
+    `);
 
     // Tabela de categorias
     await turso.execute(`
@@ -25,7 +25,7 @@ export async function runMigrations() {
         slug TEXT NOT NULL UNIQUE,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    `)
+    `);
 
     // Tabela de produtos
     await turso.execute(`
@@ -43,7 +43,18 @@ export async function runMigrations() {
         FOREIGN KEY (department_id) REFERENCES departments(id),
         FOREIGN KEY (category_id) REFERENCES categories(id)
       )
-    `)
+    `);
+
+    // Tabela de imagens extras dos produtos
+    await turso.execute(`
+      CREATE TABLE IF NOT EXISTS product_images (
+        id TEXT PRIMARY KEY,
+        product_id TEXT NOT NULL,
+        image_data LONGTEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    `);
 
     // Tabela de carrinho (por sessão/usuário)
     await turso.execute(`
@@ -56,7 +67,7 @@ export async function runMigrations() {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (product_id) REFERENCES products(id)
       )
-    `)
+    `);
 
     // Tabela de analytics
     await turso.execute(`
@@ -70,7 +81,7 @@ export async function runMigrations() {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (product_id) REFERENCES products(id)
       )
-    `)
+    `);
 
     // Tabela de preferências (para cookies)
     await turso.execute(`
@@ -81,7 +92,7 @@ export async function runMigrations() {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    `)
+    `);
 
     // Tabela de administradores
     await turso.execute(`
@@ -94,16 +105,18 @@ export async function runMigrations() {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
-    `)
+    `);
+ 
+
 
     // Criar usuário admin padrão se não existir
-    await createDefaultAdmin()
+    await createDefaultAdmin();
 
-    console.log("✅ Migrações executadas com sucesso!")
-    return { success: true }
+    console.log("✅ Migrações executadas com sucesso!");
+    return { success: true };
   } catch (error) {
-    console.error("❌ Erro ao executar migrações:", error)
-    throw error
+    console.error("❌ Erro ao executar migrações:", error);
+    throw error;
   }
 }
 
@@ -119,36 +132,40 @@ async function createDefaultAdmin() {
     const existing = await turso.execute({
       sql: "SELECT id FROM admins WHERE username = ?",
       args: ["admin"],
-    })
+    });
 
     if (existing.rows.length > 0) {
-      console.log("✅ Usuário admin padrão já existe")
-      return
+      console.log("✅ Usuário admin padrão já existe");
+      return;
     }
 
     // Credenciais padrão
-    const defaultUsername = "admin"
-    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "admin123"
-    const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL || "admin@dominustech.com"
+    const defaultUsername = "admin";
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "admin123";
+    const defaultEmail =
+      process.env.ADMIN_DEFAULT_EMAIL || "admin@dominustech.com";
 
     // Gera hash da senha
-    const passwordHash = hashPassword(defaultPassword)
+    const passwordHash = hashPassword(defaultPassword);
 
     // Cria o admin padrão
-    const adminId = `admin_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+    const adminId = `admin_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 15)}`;
 
     await turso.execute({
       sql: "INSERT INTO admins (id, username, email, password_hash, is_active) VALUES (?, ?, ?, ?, ?)",
       args: [adminId, defaultUsername, defaultEmail, passwordHash, 1],
-    })
+    });
 
-    console.log(`✅ Usuário admin padrão criado com sucesso!`)
-    console.log(`   Username: ${defaultUsername}`)
-    console.log(`   Password: ${defaultPassword}`)
-    console.log(`   ⚠️  IMPORTANTE: Altere a senha padrão após o primeiro login!`)
+    console.log(`✅ Usuário admin padrão criado com sucesso!`);
+    console.log(`   Username: ${defaultUsername}`);
+    console.log(`   Password: ${defaultPassword}`);
+    console.log(
+      `   ⚠️  IMPORTANTE: Altere a senha padrão após o primeiro login!`
+    );
   } catch (error) {
-    console.error("❌ Erro ao criar usuário admin padrão:", error)
+    console.error("❌ Erro ao criar usuário admin padrão:", error);
     // Não lança erro para não quebrar as migrações
   }
 }
-
