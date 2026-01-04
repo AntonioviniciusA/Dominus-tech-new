@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
-import { verifyPassword } from "@/lib/auth-utils";
+import { verifyPassword, generateToken } from "@/lib/auth-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Busca o admin no banco de dados
     const result = await turso.execute({
-      sql: "SELECT id, username, email, password_hash, is_active FROM admins WHERE username = ?",
+      sql: "SELECT id, username, email, password_hash, is_active FROM admins WHERE email = ?",
       args: [username],
     });
 
@@ -50,9 +50,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Gera token de autenticação
-    const SECRET_KEY =
-      process.env.ADMIN_SECRET_KEY || "your-secret-key-change-in-production";
-    const token = Buffer.from(`${SECRET_KEY}:${Date.now()}`).toString("base64");
+    const token = await generateToken({
+      id: admin.id,
+      username: admin.username,
+      email: admin.email,
+    });
 
     const response = NextResponse.json({
       success: true,

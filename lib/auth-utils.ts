@@ -1,39 +1,31 @@
-import crypto from "crypto"
+import bcrypt from "bcryptjs";
+import { SignJWT, jwtVerify } from "jose";
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin123"
-const SECRET_KEY = process.env.ADMIN_SECRET_KEY || "your-secret-key-change-in-production"
+const SECRET_KEY =
+  process.env.ADMIN_SECRET_KEY || "your-secret-key-change-in-production";
+const secretKey = new TextEncoder().encode(SECRET_KEY);
 
 export function hashPassword(password: string): string {
-  return crypto.createHash("sha256").update(password).digest("hex")
+  return bcrypt.hashSync(password, 10);
 }
 
 export function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash
+  return bcrypt.compareSync(password, hash);
 }
 
-export function generateToken(password: string): string {
-  const timestamp = Date.now()
-  const data = `${password}${timestamp}${SECRET_KEY}`
-  const token = crypto.createHash("sha256").update(data).digest("hex")
-  return `${token}.${timestamp}`
+export async function generateToken(payload: any): Promise<string> {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(secretKey);
 }
 
-export function verifyToken(token: string): boolean {
+export async function verifyToken(token: string): Promise<any> {
   try {
-    const decoded = Buffer.from(token, "base64").toString("utf-8")
-    const [password, timestamp] = decoded.split(":")
-    const tokenTimestamp = Number.parseInt(timestamp)
-    const now = Date.now()
-    const tokenAge = now - tokenTimestamp
-    const maxAge = 7 * 24 * 60 * 60 * 1000 // 7 days
-
-    if (tokenAge > maxAge) {
-      return false
-    }
-
-    return password === SECRET_KEY
+    const { payload } = await jwtVerify(token, secretKey);
+    return payload;
   } catch (error) {
-    console.log("[v0] Token verification error:", error)
-    return false
+    return null;
   }
 }

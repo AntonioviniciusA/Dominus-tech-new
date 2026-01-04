@@ -1,12 +1,13 @@
-import type { NextRequest } from "next/server"
-import { verifyToken } from "./auth-utils"
+import type { NextRequest } from "next/server";
+import { verifyToken } from "./auth-utils";
 
-export function checkAdminAuth(request: NextRequest): boolean {
-  const token = request.cookies.get("admin_token")?.value
+export async function checkAdminAuth(request: NextRequest): Promise<boolean> {
+  const token = request.cookies.get("admin_token")?.value;
 
   if (!token) {
-    return false
+    return false;
   }
 
-  return verifyToken(token)
+  const payload = await verifyToken(token);
+  return !!payload;
 }
