@@ -303,7 +303,7 @@ export function ProductPageContent({
             <Button
               variant="outline"
               onClick={() => setShowBuyModal(false)}
-              className="text-gray-900"
+              className="text-gray-900 bg-red-600"
             >
               Cancelar
             </Button>

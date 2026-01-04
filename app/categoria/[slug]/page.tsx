@@ -1,19 +1,55 @@
-"use client"
+"use client";
 
-import { useStore } from "@/lib/store-context"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { WhatsAppFloat } from "@/components/whatsapp-float"
-import { ProductCard } from "@/components/product-card"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useStore } from "@/lib/store-context";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { WhatsAppFloat } from "@/components/whatsapp-float";
+import { ProductCard } from "@/components/product-card";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-export default function CategoriaPage({ params }: { params: { slug: string } }) {
-  const { slug } = params
-  const { categories, getProductsByCategory } = useStore()
+export default function CategoriaPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const { slug } = params;
+  const { categories, getProductsByCategory, isLoaded } = useStore();
 
-  const category = categories.find((c) => c.slug === slug)
-  const products = category ? getProductsByCategory(category.id) : []
+  const toSlug = (s?: string) =>
+    typeof s === "string" ? s.toLowerCase().replace(/\s+/g, "-") : "";
+  const ns = typeof slug === "string" ? slug.toLowerCase() : "";
+  const stripped = ns.endsWith("s") ? ns.slice(0, -1) : ns;
+  const safeCategories = Array.isArray(categories)
+    ? categories.filter(
+        (c) =>
+          c &&
+          typeof c.id === "string" &&
+          typeof c.name === "string" &&
+          typeof c.slug === "string"
+      )
+    : [];
+  const category =
+    safeCategories.find((c) => c.slug === ns) ||
+    safeCategories.find((c) => c.slug === stripped) ||
+    safeCategories.find((c) => toSlug(c.name) === ns) ||
+    safeCategories.find((c) => toSlug(c.name) === stripped);
+  const products = category ? getProductsByCategory(category.id) : [];
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Carregando...</h1>
+          <p className="text-gray-600">
+            Aguarde enquanto carregamos os produtos da categoria.
+          </p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!category) {
     return (
@@ -27,7 +63,7 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
         </div>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
@@ -35,7 +71,10 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
       <Header />
 
       <div className="container mx-auto px-4 py-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-primary mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-primary mb-6"
+        >
           <ArrowLeft className="w-4 h-4" />
           Voltar
         </Link>
@@ -44,7 +83,9 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
 
         {products.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Nenhum produto encontrado nesta categoria</p>
+            <p className="text-gray-500 text-lg">
+              Nenhum produto encontrado nesta categoria
+            </p>
           </div>
         ) : (
           <div className="grid md:grid-cols-4 gap-6">
@@ -52,7 +93,7 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
               <ProductCard
                 key={product.id}
                 productId={product.id}
-                slug={product.name.toLowerCase().replace(/\s+/g, "-")}
+                slug={toSlug(product.name)}
                 name={product.name}
                 description={product.description}
                 price={product.price}
@@ -68,5 +109,5 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
       <Footer />
       <WhatsAppFloat />
     </div>
-  )
+  );
 }

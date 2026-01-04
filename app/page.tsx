@@ -1,34 +1,39 @@
-"use client"
+"use client";
 
-import { Header } from "@/components/header"
-import { HeroBanner } from "@/components/hero-banner"
-import { ProductCard } from "@/components/product-card"
-import { Features } from "@/components/features"
-import { Footer } from "@/components/footer"
-import { WhatsAppFloat } from "@/components/whatsapp-float"
-import { InitTestData } from "@/components/init-test-data"
-import { ProductFilters } from "@/components/product-filters"
-import { Flame } from "lucide-react"
-import { useStore } from "@/lib/store-context"
-import { useState, useMemo } from "react"
+import { Header } from "@/components/header";
+import { HeroBanner } from "@/components/hero-banner";
+import { ProductCard } from "@/components/product-card";
+import { Features } from "@/components/features";
+import { Footer } from "@/components/footer";
+import { WhatsAppFloat } from "@/components/whatsapp-float";
+import { InitTestData } from "@/components/init-test-data";
+import { ProductFilters } from "@/components/product-filters";
+import { Flame } from "lucide-react";
+import { useStore } from "@/lib/store-context";
+import { useState, useMemo } from "react";
 
 export default function Home() {
-  const { products } = useStore()
+  const { products } = useStore();
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 10000,
     departments: [] as string[],
     categories: [] as string[],
-  })
+  });
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const priceMatch = product.price >= filters.minPrice && product.price <= filters.maxPrice
-      const deptMatch = filters.departments.length === 0 || filters.departments.includes(product.departmentId)
-      const catMatch = filters.categories.length === 0 || filters.categories.includes(product.categoryId)
-      return priceMatch && deptMatch && catMatch
-    })
-  }, [products, filters])
+      const priceMatch =
+        product.price >= filters.minPrice && product.price <= filters.maxPrice;
+      const deptMatch =
+        filters.departments.length === 0 ||
+        filters.departments.includes(product.departmentId);
+      const catMatch =
+        filters.categories.length === 0 ||
+        filters.categories.includes(product.categoryId);
+      return priceMatch && deptMatch && catMatch;
+    });
+  }, [products, filters]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,7 +45,7 @@ export default function Home() {
       <section className="container mx-auto px-4 py-12">
         <div className="flex items-center gap-3 mb-8">
           <Flame className="w-8 h-8 text-green-600" />
-          <h2 className="text-3xl font-bold text-gray-900">DESTAQUES</h2>
+          <h2 className="text-3xl font-bold text-green-600">DESTAQUES</h2>
         </div>
 
         <div className="grid md:grid-cols-4 gap-6">
@@ -96,5 +101,5 @@ export default function Home() {
 
       <WhatsAppFloat />
     </div>
-  )
+  );
 }

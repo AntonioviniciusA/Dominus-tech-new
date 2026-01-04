@@ -483,19 +483,19 @@ export default function ProdutosPage() {
                           </div>
                           <div>
                             <Label className="text-gray-900">Preço (R$)</Label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={editData.price}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  price: Number.parseFloat(e.target.value),
-                                })
-                              }
-                              className="text-gray-900"
-                              required
-                            />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={String(editData.price ?? "")}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                price: e.target.value,
+                              })
+                            }
+                            className="text-gray-900"
+                            required
+                          />
                           </div>
                           <div>
                             <Label className="text-gray-900">Imagem</Label>
