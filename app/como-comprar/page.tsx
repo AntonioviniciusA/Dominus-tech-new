@@ -119,7 +119,7 @@ export default function ComoComprar() {
                     <ul className="list-disc list-inside space-y-1 ml-4 text-gray-600">
                       <li>
                         <strong>Cartão de Crédito:</strong> Parcelamento em até
-                        12x sem juros (conforme condições)
+                        18x com juros (conforme condições)
                       </li>
                       <li>
                         <strong>Cartão de Débito:</strong> Pagamento à vista com

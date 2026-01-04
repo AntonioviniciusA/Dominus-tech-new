@@ -7,6 +7,9 @@ import { hashPassword } from "../auth-utils";
  */
 export async function runMigrations() {
   try {
+    await turso.execute(`
+      DROP TABLE admins;
+    `);
     // Tabela de departamentos
     await turso.execute(`
       CREATE TABLE IF NOT EXISTS departments (
@@ -34,7 +37,7 @@ export async function runMigrations() {
         name TEXT NOT NULL,
         description TEXT,
         price REAL NOT NULL,
-        image LONGTEXT,
+        image TEXT,
         department_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
         installments INTEGER,
@@ -50,7 +53,7 @@ export async function runMigrations() {
       CREATE TABLE IF NOT EXISTS product_images (
         id TEXT PRIMARY KEY,
         product_id TEXT NOT NULL,
-        image_data LONGTEXT NOT NULL,
+        image_data TEXT NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )
@@ -106,8 +109,6 @@ export async function runMigrations() {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
- 
-
 
     // Criar usuário admin padrão se não existir
     await createDefaultAdmin();

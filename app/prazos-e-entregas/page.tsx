@@ -42,7 +42,7 @@ export default function PrazosEEntregas() {
                     <strong>Região:</strong> DF e Região Metropolitana
                   </p>
                   <p className="text-gray-600">
-                    <strong>Valor:</strong> R$ 15,00 (grátis para compras acima
+                    <strong>Valor:</strong> R$ 50,00 (grátis para compras acima
                     de R$ 200,00)
                   </p>
                 </div>

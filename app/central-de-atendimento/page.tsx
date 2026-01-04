@@ -5,7 +5,7 @@ import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 
 export default function CentralDeAtendimento() {
   const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "556184497981";
-  const facebookUrl = process.env.NEXT_PUBLIC_FACEBOOK_URL || "#";
+
   const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "#";
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,9 +136,8 @@ export default function CentralDeAtendimento() {
                     Como posso rastrear meu pedido?
                   </h3>
                   <p className="text-gray-600">
-                    Após a confirmação do pedido, você receberá um código de
-                    rastreamento por e-mail. Você também pode entrar em contato
-                    conosco para informações sobre seu pedido.
+                    Você pode entrar em contato conosco para informações sobre
+                    seu pedido.
                   </p>
                 </div>
                 <div>
@@ -167,7 +166,7 @@ export default function CentralDeAtendimento() {
                     Quais formas de pagamento são aceitas?
                   </h3>
                   <p className="text-gray-600">
-                    Aceitamos cartões de crédito (em até 12x sem juros), cartão
+                    Aceitamos cartões de crédito (em até 18x com juros), cartão
                     de débito, transferência bancária e PIX.
                   </p>
                 </div>
@@ -188,12 +187,6 @@ export default function CentralDeAtendimento() {
                     novidades, promoções e dicas:
                   </p>
                   <div className="flex gap-4">
-                    <a
-                      href={facebookUrl}
-                      className="text-green-600 hover:underline font-medium"
-                    >
-                      Facebook
-                    </a>
                     <a
                       href={instagramUrl}
                       className="text-green-600 hover:underline font-medium"

@@ -88,9 +88,7 @@ export default function TermosECondicoes() {
               </h2>
               <p>
                 Aceitamos diversas formas de pagamento, incluindo cartões de
-                crédito, débito e transferência bancária. Todas as transações
-                são processadas de forma segura através de gateways de pagamento
-                confiáveis.
+                crédito, débito, dinheiro ou pix.
               </p>
               <p>
                 Ao realizar uma compra, você declara que possui autorização para
