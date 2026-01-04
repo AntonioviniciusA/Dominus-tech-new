@@ -1,9 +1,34 @@
-import { NextResponse } from "next/server"
-import { turso } from "@/lib/turso"
+import { NextResponse } from "next/server";
+import { turso } from "@/lib/turso";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const result = await turso.execute("SELECT * FROM products ORDER BY created_at DESC")
+    const url = new URL(req.url);
+    const categoryId = url.searchParams.get("categoryId");
+    const departmentId = url.searchParams.get("departmentId");
+    console.log("[API] /api/products GET params:", {
+      categoryId,
+      departmentId,
+    });
+
+    let sql = "SELECT * FROM products";
+    const args: any[] = [];
+
+    if (categoryId) {
+      sql += " WHERE category_id = ?";
+      args.push(categoryId);
+    } else if (departmentId) {
+      sql += " WHERE department_id = ?";
+      args.push(departmentId);
+    }
+
+    sql += " ORDER BY created_at DESC";
+    console.log("[API] /api/products SQL:", sql, "args:", args);
+
+    const result = await turso.execute({
+      sql,
+      args,
+    });
     const products = result.rows.map((row) => ({
       id: row.id as string,
       name: row.name as string,
@@ -14,26 +39,41 @@ export async function GET() {
       categoryId: row.category_id as string,
       installments: row.installments as number | null,
       installmentPrice: row.installment_price as number | null,
-    }))
-    return NextResponse.json(products)
+    }));
+    console.log("[API] /api/products result count:", products.length);
+    return NextResponse.json(products);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error(
+      "[API] /api/products error:",
+      error?.message || String(error)
+    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const { name, description, price, image, departmentId, categoryId, installments, installmentPrice } =
-      await req.json()
+    const {
+      name,
+      description,
+      price,
+      image,
+      departmentId,
+      categoryId,
+      installments,
+      installmentPrice,
+    } = await req.json();
 
     if (!name || price === undefined || !departmentId || !categoryId) {
       return NextResponse.json(
         { error: "Nome, preço, departamento e categoria são obrigatórios" },
-        { status: 400 },
-      )
+        { status: 400 }
+      );
     }
 
-    const id = `prod_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+    const id = `prod_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 15)}`;
 
     await turso.execute({
       sql: `INSERT INTO products (id, name, description, price, image, department_id, category_id, installments, installment_price)
@@ -49,7 +89,7 @@ export async function POST(req: Request) {
         installments || null,
         installmentPrice || null,
       ],
-    })
+    });
 
     const product = {
       id,
@@ -61,11 +101,10 @@ export async function POST(req: Request) {
       categoryId,
       installments: installments || undefined,
       installmentPrice: installmentPrice || undefined,
-    }
+    };
 
-    return NextResponse.json(product, { status: 201 })
+    return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
