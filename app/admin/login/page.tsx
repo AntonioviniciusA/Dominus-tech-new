@@ -1,46 +1,46 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { AlertCircle } from "lucide-react"
-import Image from "next/image"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-      })
+      });
 
       if (response.ok) {
-        router.push("/admin")
+        router.push("/admin");
       } else {
-        const data = await response.json()
-        setError(data.error || "Credenciais inválidas. Tente novamente.")
+        const data = await response.json();
+        setError(data.error || "Credenciais inválidas. Tente novamente.");
       }
     } catch (err) {
-      setError("Erro ao fazer login. Tente novamente.")
+      setError("Erro ao fazer login. Tente novamente.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -48,10 +48,19 @@ export default function AdminLoginPage() {
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <Image src="/images/design-mode/image.png" alt="Logo" width={60} height={60} />
+              <Image
+                src="/images/design-mode/Logo.png"
+                alt="Logo"
+                width={100}
+                height={100}
+              />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Área Administrativa</h1>
-            <p className="text-gray-600 text-sm mt-2">Faça login para continuar</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Área Administrativa
+            </h1>
+            <p className="text-gray-600 text-sm mt-2">
+              Faça login para continuar
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -63,7 +72,9 @@ export default function AdminLoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Usuário</label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Usuário
+              </label>
               <Input
                 type="text"
                 value={username}
@@ -76,7 +87,9 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Senha</label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Senha
+              </label>
               <Input
                 type="password"
                 value={password}
@@ -97,9 +110,11 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <p className="text-xs text-gray-500 text-center mt-4">Desenvolvido por DominusTech</p>
+          <p className="text-xs text-gray-500 text-center mt-4">
+            Desenvolvido por DominusTech
+          </p>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

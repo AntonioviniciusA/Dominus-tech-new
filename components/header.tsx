@@ -1,66 +1,68 @@
-"use client"
+"use client";
 
-import { Search, ShoppingCart, ChevronDown } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import Image from "next/image"
-import Link from "next/link"
-import { useState, useRef, useEffect } from "react"
-import { useStore } from "@/lib/store-context"
+import { Search, ShoppingCart, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import { useStore } from "@/lib/store-context";
 
 export function Header() {
-  const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [showSearchResults, setShowSearchResults] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLDivElement>(null)
-  const { departments, categories, products, cart } = useStore()
+  const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const { departments, categories, products, cart } = useStore();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDepartmentsOpen(false)
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDepartmentsOpen(false);
       }
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSearchResults(false)
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchResults(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query)
+    setSearchQuery(query);
     if (query.trim()) {
       const results = products.filter(
         (p) =>
           p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.description.toLowerCase().includes(query.toLowerCase()),
-      )
-      setSearchResults(results)
-      setShowSearchResults(true)
+          p.description.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(results);
+      setShowSearchResults(true);
     } else {
-      setSearchResults([])
-      setShowSearchResults(false)
+      setSearchResults([]);
+      setShowSearchResults(false);
     }
-  }
+  };
 
   return (
     <header className="bg-black border-b border-gray-800">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
-          <Link href="/" className="flex items-center gap-3">
+        <div className="flex items-center justify-between py-2">
+          <Link href="/" className="flex items-center gap-1">
             <Image
-              src="/images/design-mode/image.png"
+              src="/images/design-mode/Logo-light.png"
               alt="Dominus Tech Logo"
-              width={60}
-              height={60}
-              className="brightness-0 invert hover:opacity-80 transition-opacity"
+              width={80}
+              height={80}
+              className="hover:opacity-80 transition-opacity"
             />
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-bold text-white">Dominus</span>
-              <span className="text-xs text-primary font-semibold">tech</span>
-            </div>
           </Link>
 
           <div className="relative" ref={dropdownRef}>
@@ -68,8 +70,14 @@ export function Header() {
               onClick={() => setIsDepartmentsOpen(!isDepartmentsOpen)}
               className="flex items-center gap-2 text-white hover:text-primary transition-colors"
             >
-              <span className="text-sm font-medium mx-1 px-1">DEPARTAMENTOS</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isDepartmentsOpen ? "rotate-180" : ""}`} />
+              <span className="text-sm font-medium mx-1 px-1">
+                DEPARTAMENTOS
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  isDepartmentsOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
 
             {isDepartmentsOpen && (
@@ -86,7 +94,9 @@ export function Header() {
                     </Link>
                   ))
                 ) : (
-                  <div className="px-4 py-2 text-gray-500 text-sm">Nenhum departamento cadastrado</div>
+                  <div className="px-4 py-2 text-gray-500 text-sm">
+                    Nenhum departamento cadastrado
+                  </div>
                 )}
               </div>
             )}
@@ -109,7 +119,9 @@ export function Header() {
                 {searchResults.slice(0, 5).map((product) => (
                   <Link
                     key={product.id}
-                    href={`/produto/${product.name.toLowerCase().replace(/\s+/g, "-")}`}
+                    href={`/produto/${product.name
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")}`}
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100 text-sm"
                     onClick={() => setShowSearchResults(false)}
                   >
@@ -149,5 +161,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
