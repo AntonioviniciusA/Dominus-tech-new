@@ -54,7 +54,7 @@ export function ProductPageContent({ slug }: ProductPageContentProps) {
     )
   }
 
-  const productImages = [product.image, "/product-variant.png"]
+  const productImages = [product.image] // Você pode adicionar mais imagens aqui se disponível
 
   const handleBuyClick = () => {
     if (!cookiesAccepted) {

@@ -34,7 +34,7 @@ export async function runMigrations() {
         name TEXT NOT NULL,
         description TEXT,
         price REAL NOT NULL,
-        image TEXT,
+        image LONGTEXT,
         department_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
         installments INTEGER,
