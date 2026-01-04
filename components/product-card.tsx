@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { ShoppingCart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import Image from "next/image"
-import Link from "next/link"
-import { useStore } from "@/lib/store-context"
-import { useState } from "react"
+import { ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import Image from "next/image";
+import Link from "next/link";
+import { useStore } from "@/lib/store-context";
+import { useState } from "react";
 
 interface ProductCardProps {
-  name: string
-  description: string
-  price: number
-  installments: number
-  installmentPrice: number
-  image: string
-  productId?: string
-  slug?: string
-  onBuyClick?: () => void
+  name: string;
+  description: string;
+  price: number;
+  installments: number;
+  installmentPrice: number;
+  image: string;
+  productId?: string;
+  slug?: string;
+  onBuyClick?: () => void;
 }
 
 export function ProductCard({
@@ -31,8 +31,9 @@ export function ProductCard({
   slug,
   onBuyClick,
 }: ProductCardProps) {
-  const { trackProductClick } = useStore()
-  const [isClicked, setIsClicked] = useState(false)
+  const { trackProductClick } = useStore();
+  const [isClicked, setIsClicked] = useState(false);
+  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "556184497981";
 
   const handleProductClick = () => {
     if (productId) {
@@ -46,29 +47,52 @@ export function ProductCard({
         categoryId: "",
         installments,
         installmentPrice,
-      })
-      setIsClicked(true)
+      });
+      setIsClicked(true);
     }
-  }
+  };
 
   const handleBuyClick = () => {
-    handleProductClick()
-    onBuyClick?.()
-  }
+    handleProductClick();
+    const whatsappMessage = encodeURIComponent(
+      ` Olá!\n Tenho interesse no produto *${name}*.\n \n Quantidade: 1\n Preço: R$ ${price
+        .toFixed(2)
+        .replace(".", ",")}\n `
+    );
+    window.open(
+      `https://wa.me/${phoneNumber}?text=${whatsappMessage}`,
+      "_blank"
+    );
+    onBuyClick?.();
+  };
 
   return (
-    <Link href={slug ? `/produto/${slug}` : "#"} onClick={handleProductClick} className="block">
+    <Link
+      href={slug ? `/produto/${slug}` : "#"}
+      onClick={handleProductClick}
+      className="block"
+    >
       <Card className="bg-white border-gray-200 hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
         <CardContent className="p-4 flex-1">
           <div className="relative aspect-square mb-4">
-            <Image src={image || "/placeholder.svg"} alt={name} fill className="object-contain" />
+            <Image
+              src={image || "/placeholder.svg"}
+              alt={name}
+              fill
+              className="object-contain"
+            />
           </div>
           <h3 className="font-bold text-lg mb-2 text-background">{name}</h3>
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{description}</p>
+          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+            {description}
+          </p>
           <div className="space-y-1">
-            <p className="text-3xl font-bold text-green-600">R$ {price.toFixed(2).replace(".", ",")}</p>
+            <p className="text-3xl font-bold text-green-600">
+              R$ {price.toFixed(2).replace(".", ",")}
+            </p>
             <p className="text-sm text-gray-600">
-              ou {installments}x de R$ {installmentPrice.toFixed(2).replace(".", ",")} com juros
+              ou {installments}x de R${" "}
+              {installmentPrice.toFixed(2).replace(".", ",")} com juros
             </p>
           </div>
         </CardContent>
@@ -76,8 +100,8 @@ export function ProductCard({
           <Button
             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
             onClick={(e) => {
-              e.preventDefault()
-              handleBuyClick()
+              e.preventDefault();
+              handleBuyClick();
             }}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
@@ -86,5 +110,5 @@ export function ProductCard({
         </CardFooter>
       </Card>
     </Link>
-  )
+  );
 }

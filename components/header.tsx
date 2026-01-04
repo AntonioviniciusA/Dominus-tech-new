@@ -54,7 +54,7 @@ export function Header() {
   return (
     <header className="bg-black border-b border-gray-800">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-2">
+        <div className="flex items-center justify-between py-2 sm:flex-row">
           <Link href="/" className="flex items-center gap-1">
             <Image
               src="/images/design-mode/Logo-light.png"

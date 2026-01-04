@@ -4,6 +4,9 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 
 export default function CentralDeAtendimento() {
+  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "556184497981";
+  const facebookUrl = process.env.NEXT_PUBLIC_FACEBOOK_URL || "#";
+  const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "#";
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -74,7 +77,7 @@ export default function CentralDeAtendimento() {
                       Entre em contato através do nosso WhatsApp
                     </p>
                     <a
-                      href="https://wa.me/556184497981"
+                      href={`https://wa.me/${phoneNumber}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
@@ -186,13 +189,13 @@ export default function CentralDeAtendimento() {
                   </p>
                   <div className="flex gap-4">
                     <a
-                      href="#"
+                      href={facebookUrl}
                       className="text-green-600 hover:underline font-medium"
                     >
                       Facebook
                     </a>
                     <a
-                      href="#"
+                      href={instagramUrl}
                       className="text-green-600 hover:underline font-medium"
                     >
                       Instagram

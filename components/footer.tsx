@@ -1,8 +1,9 @@
 import { Facebook, Instagram, MapPin, Mail, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function Footer() {
+  const facebookUrl = process.env.NEXT_PUBLIC_FACEBOOK_URL || "#";
+  const instagramUrl = process.env.NEXT_PUBLIC_INSTAGRAM_URL || "#";
   return (
     <footer className="bg-black text-white border-t border-gray-800">
       <div className="container mx-auto px-4 py-12">
@@ -117,21 +118,18 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-4">Redes Sociais</h3>
             <div className="flex gap-4 mb-6">
               <a
-                href="#"
+                href={facebookUrl}
                 className="bg-gray-800 hover:bg-green-600 p-3 rounded-lg transition-colors"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href={instagramUrl}
                 className="bg-gray-800 hover:bg-green-600 p-3 rounded-lg transition-colors"
               >
                 <Instagram className="w-5 h-5" />
               </a>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700 text-white font-bold w-full">
-              Avalie Nosso Site
-            </Button>
           </div>
         </div>
 

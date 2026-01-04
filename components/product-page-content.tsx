@@ -42,6 +42,7 @@ export function ProductPageContent({
   const [showCookieWarning, setShowCookieWarning] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "556184497981";
 
   useEffect(() => {
     if (products.length > 0) {
@@ -91,6 +92,23 @@ export function ProductPageContent({
     setShowBuyModal(true);
   };
 
+  const handleWhatsAppBuy = () => {
+    if (!cookiesAccepted) {
+      setCookiesAccepted(true);
+    }
+    trackProductClick(product);
+    const whatsappMessage = encodeURIComponent(
+      ` Olá!\n Tenho interesse no produto *${
+        product.name
+      }*.\n \n Quantidade: ${quantity}\n Preço: R$ ${product.price
+        .toFixed(2)
+        .replace(".", ",")}\n `
+    );
+    window.open(
+      `https://wa.me/${phoneNumber}?text=${whatsappMessage}`,
+      "_blank"
+    );
+  };
   const handleAddToCart = () => {
     if (!cookiesAccepted) {
       setCookiesAccepted(true);
@@ -234,7 +252,7 @@ export function ProductPageContent({
               </Button>
               <Button
                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-6"
-                onClick={handleBuyClick}
+                onClick={handleWhatsAppBuy}
               >
                 <ArrowLeft className="w-5 h-5 mr-2 rotate-180" />
                 Comprar agora

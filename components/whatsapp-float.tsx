@@ -4,8 +4,7 @@ import { MessageCircle } from "lucide-react"
 
 export function WhatsAppFloat() {
   const handleWhatsAppClick = () => {
-    // Substitua pelo número de WhatsApp da Dominus Tech (formato: 5561999999999)
-    const phoneNumber = "5561999999999"
+    const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "556184497981"
     const message = encodeURIComponent("Olá! Gostaria de mais informações.")
     window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank")
   }
