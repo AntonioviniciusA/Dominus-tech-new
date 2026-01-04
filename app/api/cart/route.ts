@@ -5,6 +5,7 @@ import { getSessionId } from "@/lib/db/session"
 export async function GET() {
   try {
     const sessionId = await getSessionId()
+    console.log("[API] cart GET sessionId:", sessionId)
 
     // Busca o carrinho com os dados completos dos produtos
     const result = await turso.execute({
@@ -41,16 +42,22 @@ export async function GET() {
       quantity: row.quantity as number,
     }))
 
+    console.log("[API] cart GET items:", cart.length)
     return NextResponse.json(cart)
   } catch (error: any) {
+    console.error("[API] cart GET error:", error?.message || String(error))
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const { productId, quantity } = await req.json()
+    const body = await req.json()
+    const productId = String(body?.productId ?? "").trim()
+    const qRaw = body?.quantity
+    const quantity = typeof qRaw === "string" ? Number.parseInt(qRaw) : Number(qRaw)
     const sessionId = await getSessionId()
+    console.log("[API] cart POST productId:", productId, "raw quantity:", qRaw, "sessionId:", sessionId)
 
     if (!productId || !quantity) {
       return NextResponse.json({ error: "ProductId e quantity são obrigatórios" }, { status: 400 })
@@ -78,8 +85,10 @@ export async function POST(req: Request) {
       })
     }
 
+    console.log("[API] cart POST ok")
     return NextResponse.json({ success: true }, { status: 201 })
   } catch (error: any) {
+    console.error("[API] cart POST error:", error?.message || String(error))
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
@@ -87,14 +96,17 @@ export async function POST(req: Request) {
 export async function DELETE() {
   try {
     const sessionId = await getSessionId()
+    console.log("[API] cart DELETE ALL sessionId:", sessionId)
 
     await turso.execute({
       sql: "DELETE FROM cart WHERE session_id = ?",
       args: [sessionId],
     })
 
+    console.log("[API] cart DELETE ALL ok")
     return NextResponse.json({ success: true })
   } catch (error: any) {
+    console.error("[API] cart DELETE ALL error:", error?.message || String(error))
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
