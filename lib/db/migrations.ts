@@ -43,6 +43,14 @@ export async function runMigrations() {
         installments INTEGER,
         installment_price REAL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        -- Campos para sincronização com Google Merchant Center
+        gmc_product_id TEXT,
+        gmc_sync_status TEXT CHECK(gmc_sync_status IN ('PENDING', 'PROCESSING', 'SYNCED', 'ERROR', 'DISABLED')),
+        gmc_last_sync TEXT,
+        gmc_error TEXT,
+        retry_count INTEGER DEFAULT 0,
+        last_retry TEXT,
         FOREIGN KEY (department_id) REFERENCES departments(id),
         FOREIGN KEY (category_id) REFERENCES categories(id)
       )
@@ -110,6 +118,61 @@ export async function runMigrations() {
       )
     `);
 
+    // Tabela de clientes
+    await turso.execute(`
+      CREATE TABLE IF NOT EXISTS clients (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Tabela de vendas (PDV)
+    await turso.execute(`
+      CREATE TABLE IF NOT EXISTS sales (
+        id TEXT PRIMARY KEY,
+        client_id TEXT,
+        subtotal REAL NOT NULL,
+        discount REAL DEFAULT 0,
+        total REAL NOT NULL,
+        payment_method TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (client_id) REFERENCES clients(id)
+      )
+    `);
+
+    // Tabela de itens de vendas
+    await turso.execute(`
+      CREATE TABLE IF NOT EXISTS sale_items (
+        id TEXT PRIMARY KEY,
+        sale_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        unit_price REAL NOT NULL,
+        total_price REAL NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id)
+      )
+    `);
+
+    // Tabela de redefinição de senha
+    await turso.execute(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id TEXT PRIMARY KEY,
+        admin_id TEXT NOT NULL,
+        token TEXT NOT NULL UNIQUE,
+        expires_at TEXT NOT NULL,
+        used INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (admin_id) REFERENCES admins(id)
+      )
+    `);
+
     // Criar usuário admin padrão se não existir
     await createDefaultAdmin();
 
@@ -163,7 +226,7 @@ async function createDefaultAdmin() {
     console.log(`   Username: ${defaultUsername}`);
     console.log(`   Password: ${defaultPassword}`);
     console.log(
-      `   ⚠️  IMPORTANTE: Altere a senha padrão após o primeiro login!`
+      `   ⚠️  IMPORTANTE: Altere a senha padrão após o primeiro login!`,
     );
   } catch (error) {
     console.error("❌ Erro ao criar usuário admin padrão:", error);

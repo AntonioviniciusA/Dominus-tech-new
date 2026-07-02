@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
+import { gmcSyncService } from "@/lib/services/gmc-sync-service";
 
 export async function GET(req: Request) {
   try {
@@ -39,13 +40,20 @@ export async function GET(req: Request) {
       categoryId: row.category_id as string,
       installments: row.installments as number | null,
       installmentPrice: row.installment_price as number | null,
+      // Campos de sincronização com Google Merchant Center
+      gmcProductId: row.gmc_product_id as string | undefined,
+      gmcSyncStatus: row.gmc_sync_status as string | undefined,
+      gmcLastSync: row.gmc_last_sync as string | undefined,
+      gmcError: row.gmc_error as string | undefined,
+      retryCount: row.retry_count as number | undefined,
+      lastRetry: row.last_retry as string | undefined,
     }));
     console.log("[API] /api/products result count:", products.length);
     return NextResponse.json(products);
   } catch (error: any) {
     console.error(
       "[API] /api/products error:",
-      error?.message || String(error)
+      error?.message || String(error),
     );
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -67,7 +75,7 @@ export async function POST(req: Request) {
     if (!name || price === undefined || !departmentId || !categoryId) {
       return NextResponse.json(
         { error: "Nome, preço, departamento e categoria são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -76,8 +84,8 @@ export async function POST(req: Request) {
       .substring(2, 15)}`;
 
     await turso.execute({
-      sql: `INSERT INTO products (id, name, description, price, image, department_id, category_id, installments, installment_price)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO products (id, name, description, price, image, department_id, category_id, installments, installment_price, gmc_sync_status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       args: [
         id,
         name,
@@ -88,8 +96,21 @@ export async function POST(req: Request) {
         categoryId,
         installments || null,
         installmentPrice || null,
+        "PENDING", // Status inicial de sincronização com GMC
       ],
     });
+
+    // Adiciona à fila de sincronização com o Google Merchant Center
+    try {
+      await gmcSyncService.enqueueProduct(id, "CREATE");
+      console.log(`✅ Produto ${id} adicionado à fila de sincronização GMC`);
+    } catch (syncError) {
+      console.error(
+        `⚠️ Erro ao adicionar produto ${id} à fila GMC:`,
+        syncError,
+      );
+      // Não falha a criação do produto se a sincronização falhar
+    }
 
     const product = {
       id,
@@ -101,6 +122,13 @@ export async function POST(req: Request) {
       categoryId,
       installments: installments || undefined,
       installmentPrice: installmentPrice || undefined,
+      // Campos de sincronização com Google Merchant Center
+      gmcSyncStatus: "PENDING" as const,
+      gmcProductId: undefined,
+      gmcLastSync: undefined,
+      gmcError: undefined,
+      retryCount: 0,
+      lastRetry: undefined,
     };
 
     return NextResponse.json(product, { status: 201 });

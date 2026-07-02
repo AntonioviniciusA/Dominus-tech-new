@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
+import { gmcSyncService } from "@/lib/services/gmc-sync-service";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const url = new URL(req.url);
@@ -13,7 +14,7 @@ export async function PUT(
     if (!id) {
       return NextResponse.json(
         { error: "ID inválido para atualização" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     console.log(id);
@@ -51,7 +52,7 @@ export async function PUT(
     ) {
       return NextResponse.json(
         { error: "Valor de parcela inválido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (name !== undefined && typeof name !== "string") {
@@ -64,18 +65,18 @@ export async function PUT(
       description === null
         ? null
         : typeof description === "string"
-        ? description
-        : undefined;
+          ? description
+          : undefined;
     const priceNorm =
       price === null
         ? null
         : typeof price === "string"
-        ? price.trim() === ""
-          ? null
-          : Number(price)
-        : typeof price === "number"
-        ? price
-        : undefined;
+          ? price.trim() === ""
+            ? null
+            : Number(price)
+          : typeof price === "number"
+            ? price
+            : undefined;
     if (typeof priceNorm === "number" && Number.isNaN(priceNorm)) {
       // se conversão resultou em NaN, tratar como null
       (priceNorm as unknown as null) = null;
@@ -84,10 +85,10 @@ export async function PUT(
       image === null
         ? null
         : typeof image === "string"
-        ? image.trim() === ""
-          ? null
-          : image
-        : undefined;
+          ? image.trim() === ""
+            ? null
+            : image
+          : undefined;
     const deptNorm =
       typeof departmentId === "string" ? departmentId : undefined;
     const catNorm = typeof categoryId === "string" ? categoryId : undefined;
@@ -95,12 +96,12 @@ export async function PUT(
       installments === null
         ? null
         : typeof installments === "string"
-        ? installments.trim() === ""
-          ? null
-          : Number.parseInt(installments)
-        : typeof installments === "number"
-        ? installments
-        : undefined;
+          ? installments.trim() === ""
+            ? null
+            : Number.parseInt(installments)
+          : typeof installments === "number"
+            ? installments
+            : undefined;
     if (typeof instNorm === "number" && Number.isNaN(instNorm)) {
       (instNorm as unknown as null) = null;
     }
@@ -108,12 +109,12 @@ export async function PUT(
       installmentPrice === null
         ? null
         : typeof installmentPrice === "string"
-        ? installmentPrice.trim() === ""
-          ? null
-          : Number(installmentPrice)
-        : typeof installmentPrice === "number"
-        ? installmentPrice
-        : undefined;
+          ? installmentPrice.trim() === ""
+            ? null
+            : Number(installmentPrice)
+          : typeof installmentPrice === "number"
+            ? installmentPrice
+            : undefined;
     if (typeof instPriceNorm === "number" && Number.isNaN(instPriceNorm)) {
       (instPriceNorm as unknown as null) = null;
     }
@@ -157,16 +158,45 @@ export async function PUT(
     if (updates.length === 0) {
       return NextResponse.json(
         { error: "Nenhum campo para atualizar" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
+    // Campos relevantes para sincronização com Google Merchant Center
+    const gmcRelevantFields = [
+      "name",
+      "description",
+      "price",
+      "image",
+      "department_id",
+      "category_id",
+    ];
+    const hasGmcRelevantChanges = updates.some((update) =>
+      gmcRelevantFields.some((field) => update.includes(field)),
+    );
+
     args.push(id);
+
+    // Adiciona updated_at à atualização
+    updates.push("updated_at = CURRENT_TIMESTAMP");
 
     await turso.execute({
       sql: `UPDATE products SET ${updates.join(", ")} WHERE id = ?`,
       args,
     });
+
+    // Se foram atualizados campos relevantes para o GMC, marca como PENDING
+    if (hasGmcRelevantChanges) {
+      try {
+        await gmcSyncService.enqueueProduct(id, "UPDATE");
+        console.log(`✅ Produto ${id} marcado para ressincronização com GMC`);
+      } catch (syncError) {
+        console.error(
+          `⚠️ Erro ao marcar produto ${id} para ressincronização GMC:`,
+          syncError,
+        );
+      }
+    }
 
     const result = await turso.execute({
       sql: "SELECT * FROM products WHERE id = ?",
@@ -176,7 +206,7 @@ export async function PUT(
     if (result.rows.length === 0) {
       return NextResponse.json(
         { error: "Produto não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -191,6 +221,13 @@ export async function PUT(
       categoryId: row.category_id as string,
       installments: row.installments as number | null,
       installmentPrice: row.installment_price as number | null,
+      // Campos de sincronização com Google Merchant Center
+      gmcProductId: row.gmc_product_id as string | undefined,
+      gmcSyncStatus: row.gmc_sync_status as string | undefined,
+      gmcLastSync: row.gmc_last_sync as string | undefined,
+      gmcError: row.gmc_error as string | undefined,
+      retryCount: row.retry_count as number | undefined,
+      lastRetry: row.last_retry as string | undefined,
     };
 
     return NextResponse.json(product);
@@ -201,14 +238,14 @@ export async function PUT(
         error: "Erro interno ao atualizar produto",
         details: error?.message || String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const url = new URL(req.url);
@@ -219,7 +256,23 @@ export async function DELETE(
     if (!sanitizedId) {
       return NextResponse.json(
         { error: "ID inválido para exclusão" },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    // Adiciona à fila de sincronização para deletar no GMC antes de remover do banco
+    try {
+      await gmcSyncService.enqueueProduct(sanitizedId, "DELETE");
+      console.log(`✅ Produto ${sanitizedId} marcado para exclusão no GMC`);
+
+      // Aguarda um pouco para garantir que o item foi adicionado à fila
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await gmcSyncService.processBatch(1); // Processa imediatamente este item
+      console.log(`✅ Produto ${sanitizedId} processado para exclusão no GMC`);
+    } catch (syncError) {
+      console.error(
+        `⚠️ Erro ao marcar produto ${sanitizedId} para exclusão no GMC:`,
+        syncError,
       );
     }
 
@@ -247,7 +300,7 @@ export async function DELETE(
         error: "Erro interno ao deletar produto",
         details: error?.message || String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

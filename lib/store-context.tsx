@@ -21,6 +21,9 @@ export interface Category {
   slug: string;
 }
 
+export type GmcSyncStatus =
+  "PENDING" | "PROCESSING" | "SYNCED" | "ERROR" | "DISABLED";
+
 export interface Product {
   id: string;
   name: string;
@@ -31,6 +34,13 @@ export interface Product {
   categoryId: string;
   installments?: number;
   installmentPrice?: number;
+  // Campos para sincronização com Google Merchant Center
+  gmcProductId?: string;
+  gmcSyncStatus?: GmcSyncStatus;
+  gmcLastSync?: string;
+  gmcError?: string;
+  retryCount?: number;
+  lastRetry?: string;
 }
 
 export interface CartItem {
@@ -58,7 +68,7 @@ interface StoreContextType {
   addProduct: (product: Omit<Product, "id">) => Promise<void>;
   updateDepartment: (
     id: string,
-    department: Partial<Department>
+    department: Partial<Department>,
   ) => Promise<void>;
   updateCategory: (id: string, category: Partial<Category>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
@@ -166,7 +176,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao adicionar departamento:", error);
       }
     },
-    []
+    [],
   );
 
   const updateDepartment = useCallback(
@@ -180,14 +190,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (res.ok) {
           const updated = await res.json();
           setDepartments((prev) =>
-            prev.map((d) => (d.id === id ? updated : d))
+            prev.map((d) => (d.id === id ? updated : d)),
           );
         }
       } catch (error) {
         console.error("Erro ao atualizar departamento:", error);
       }
     },
-    []
+    [],
   );
 
   const deleteDepartment = useCallback(async (id: string) => {
@@ -242,7 +252,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao atualizar categoria:", error);
       }
     },
-    []
+    [],
   );
 
   const deleteCategory = useCallback(async (id: string) => {
@@ -297,7 +307,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao atualizar produto:", error);
       }
     },
-    []
+    [],
   );
 
   const deleteProduct = useCallback(async (id: string) => {
@@ -371,7 +381,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error("Erro ao atualizar quantidade do carrinho:", error);
       }
     },
-    [removeCart]
+    [removeCart],
   );
 
   const clearCart = useCallback(async () => {
@@ -409,7 +419,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                   clicks: a.clicks + 1,
                   lastClicked: new Date().toISOString(),
                 }
-              : a
+              : a,
           );
         } else {
           return [
@@ -452,14 +462,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (departmentId: string) => {
       return products.filter((p) => p.departmentId === departmentId);
     },
-    [products]
+    [products],
   );
 
   const getProductsByCategory = useCallback(
     (categoryId: string) => {
       return products.filter((p) => p.categoryId === categoryId);
     },
-    [products]
+    [products],
   );
 
   return (

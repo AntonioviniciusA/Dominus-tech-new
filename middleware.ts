@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { checkAdminAuth } from "@/lib/admin-auth-middleware";
+import { initializeGmcSync } from "@/lib/init-gmc-sync";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Inicializa o serviço de sincronização GMC na primeira requisição
+  if (pathname !== "/favicon.ico" && pathname !== "/_next/static") {
+    initializeGmcSync().catch((error) => {
+      console.error("❌ Erro ao inicializar GMC sync no middleware:", error);
+    });
+  }
 
   // Ignorar arquivos estáticos e API routes públicas que não sejam de admin (opcional, mas bom para performance)
   if (
@@ -35,14 +43,11 @@ export async function middleware(request: NextRequest) {
   // Proteção para API rotas de admin (exceto auth)
   if (pathname.startsWith("/api/admin")) {
     const publicApiRoutes = ["/api/admin/auth", "/api/admin/logout"];
-    
+
     if (!publicApiRoutes.includes(pathname)) {
       const isAuthenticated = await checkAdminAuth(request);
       if (!isAuthenticated) {
-        return NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
     }
   }
