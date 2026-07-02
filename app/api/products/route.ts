@@ -16,9 +16,31 @@ export async function GET(req: Request) {
     const args: any[] = [];
 
     if (categoryId) {
+      // Validação: categoryId deve ser uma string não vazia e apenas alfanumérica
+      if (
+        typeof categoryId !== "string" ||
+        !categoryId ||
+        !/^[a-zA-Z0-9\-_]+$/.test(categoryId)
+      ) {
+        return NextResponse.json(
+          { error: "ID de categoria inválido" },
+          { status: 400 },
+        );
+      }
       sql += " WHERE category_id = ?";
       args.push(categoryId);
     } else if (departmentId) {
+      // Validação: departmentId deve ser uma string não vazia e apenas alfanumérica
+      if (
+        typeof departmentId !== "string" ||
+        !departmentId ||
+        !/^[a-zA-Z0-9\-_]+$/.test(departmentId)
+      ) {
+        return NextResponse.json(
+          { error: "ID de departamento inválido" },
+          { status: 400 },
+        );
+      }
       sql += " WHERE department_id = ?";
       args.push(departmentId);
     }

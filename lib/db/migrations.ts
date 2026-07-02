@@ -203,11 +203,19 @@ async function createDefaultAdmin() {
       return;
     }
 
-    // Credenciais padrão
-    const defaultUsername = "admin";
-    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "admin123";
+    // Credenciais padrão - REQUER configuração de ambiente
+    const defaultUsername = process.env.ADMIN_DEFAULT_USERNAME || "admin";
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD;
     const defaultEmail =
       process.env.ADMIN_DEFAULT_EMAIL || "admin@dominustech.com";
+
+    if (!defaultPassword) {
+      throw new Error(
+        "❌ ADMIN_DEFAULT_PASSWORD não está definida. " +
+          "Configure uma senha forte no arquivo .env.local para o usuário admin padrão. " +
+          "Exemplo: ADMIN_DEFAULT_PASSWORD=SuaSenhaForte123!@#",
+      );
+    }
 
     // Gera hash da senha
     const passwordHash = hashPassword(defaultPassword);

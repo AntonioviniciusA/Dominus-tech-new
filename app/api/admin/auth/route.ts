@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
 import { verifyPassword, generateToken } from "@/lib/auth-utils";
+import {
+  handleApiError,
+  createValidationError,
+} from "@/lib/errors/api-error-handler";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +13,7 @@ export async function POST(request: NextRequest) {
     if (!username || !password) {
       return NextResponse.json(
         { error: "Username e senha são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -22,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (result.rows.length === 0) {
       return NextResponse.json(
         { error: "Credenciais inválidas" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -32,20 +36,20 @@ export async function POST(request: NextRequest) {
     if (admin.is_active !== 1) {
       return NextResponse.json(
         { error: "Conta desativada. Entre em contato com o administrador." },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Verifica a senha
     const isValidPassword = verifyPassword(
       password,
-      admin.password_hash as string
+      admin.password_hash as string,
     );
 
     if (!isValidPassword) {
       return NextResponse.json(
         { error: "Credenciais inválidas" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -66,11 +70,13 @@ export async function POST(request: NextRequest) {
     });
 
     response.cookies.set("admin_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      httpOnly: true, // Previne acesso via JavaScript (XSS protection)
+      secure: process.env.NODE_ENV === "production", // HTTPS apenas em produção
+      sameSite: "strict", // Previne CSRF (mais seguro que "lax")
       maxAge: 7 * 24 * 60 * 60, // 7 dias
       path: "/",
+      // Adicional: prevenir Access-Control
+      domain: process.env.NODE_ENV === "production" ? undefined : "localhost",
     });
 
     return response;
@@ -78,7 +84,7 @@ export async function POST(request: NextRequest) {
     console.error("Auth error:", error);
     return NextResponse.json(
       { error: "Erro ao processar autenticação" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
