@@ -1,0 +1,24 @@
+{
+  "name": "Dominus Tech",
+  "short_name": "Dominus",
+  "description": "Sua loja de tecnologia de confiança",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00FF00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/design-mode/logo-dominus-vetorizada.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/design-mode/Logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
