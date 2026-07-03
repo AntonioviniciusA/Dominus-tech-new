@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -99,6 +100,12 @@ export default function AdminLoginPage() {
                 disabled={isLoading}
                 required
               />
+              <Link 
+                href="/admin/forgot-password"
+                className="text-xs text-blue-600 hover:text-blue-700 mt-1 inline-block"
+              >
+                Esqueci minha senha
+              </Link>
             </div>
 
             <Button

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Package, FolderTree, Tag, BarChart3 } from "lucide-react"
+import { Package, FolderTree, Tag, BarChart3, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function AdminPage() {
@@ -71,6 +71,18 @@ export default function AdminPage() {
                 </div>
                 <h2 className="text-xl font-bold mb-2">Analytics</h2>
                 <p className="text-gray-600">Visualize dados de cliques dos produtos</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/admin/pdv">
+            <div className="bg-white rounded-lg p-8 border-2 border-gray-200 hover:border-primary transition-colors cursor-pointer group">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <ShoppingCart className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold mb-2">PDV</h2>
+                <p className="text-gray-600">Acesse o ponto de venda</p>
               </div>
             </div>
           </Link>

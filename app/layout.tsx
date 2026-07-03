@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: "Dominus Tech - Sua loja de tecnologia de confiança",
   description: "Bem-vindo à Dominus Tech",
   generator: "v0.app",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 }
 
 export default function RootLayout({
@@ -23,6 +27,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/apple-icon.svg" />
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body className={`${_geist.className} ${cinzel.variable} font-sans antialiased`}>
         <StoreProvider>
           {children}
